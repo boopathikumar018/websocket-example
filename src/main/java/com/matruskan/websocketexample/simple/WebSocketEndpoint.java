@@ -26,7 +26,7 @@ public class WebSocketEndpoint {
     
     @OnMessage
     public void onMessage(Session session, String message) {
-        LOGGER.info("Message received from session ID: {}, message: {}", session, message);
+        LOGGER.info("Message received from session ID: {}, message: {}", session.getId(), message);
     }
     
     @OnOpen
