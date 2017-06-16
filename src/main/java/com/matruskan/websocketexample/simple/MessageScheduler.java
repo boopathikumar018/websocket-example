@@ -18,7 +18,7 @@ public class MessageScheduler {
     @Inject
     private WebSocketEndpoint webSocketEndpoint;
     
-    @Schedule(hour = "*", minute = "*", second = "*/10")
+    @Schedule(hour = "*", minute = "*", second = "*/10", persistent = false)
     private void schedule() {
         String message = getMessage();
         webSocketEndpoint.sendToAll(message);
