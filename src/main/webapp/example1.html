@@ -4,10 +4,81 @@
         <title>WebSocket Example 1</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="style.css">
     </head>
     <body>
         <h1>WebSocket Exaple 1</h1>
-        <p>Comming soon...</p>
+        <p>In this example, you connect to a specific WebSocket URL, built with
+            the "key" parameter. You will receive the messages sent to the
+            server by other sessions with the same "key".</p>
+        <p>Also, you can send messages to sessions with other keys using the
+            REST endpoint.</p>
+        <p>Open some other tabs and try using the same and/or different keys: <a href="example1.html" target="_blank">example1.html</a></p>
         <p><a href="index.html">&lt; Back</a></p>
+        <div class="table">
+            <div>
+                <span>Your Key:</span>
+                <input id="keyToConnect" placeholder="K1"/>
+            </div>
+            <button onclick="connect();return false;" class="button">Connect Using This Key</button>
+        </div>
+        <div class="table">
+            <div>WebSocket message to same key sessions</div>
+            <div>
+                <span>Message:</span>
+                <input id="messageToKey"/>
+            </div>
+            <button onclick="sendMessageToKey();return false;" class="button">Send To This Key</button>
+        </div>
+        <form method="post" action="jaxrs/v1/messages/example1/send" class="table">
+            <div>REST endpoint to other keys</div>
+            <div>
+                <span>Other key:</span>
+                <input type="text" name="key" placeholder="K2" id="otherKey"/>
+            </div>
+            <div>
+                <span>Message:</span>
+                <input type="text" name="message" id="messageToOtherKey"/>
+            </div>
+            <input type="submit" value="Send To Other Key" onclick="onFormSubmit();" class="button">
+        </form>
+        <div id="messages"></div>
+        <script type="text/javascript">
+            var timer;
+            var ws;
+            var yourKey;
+            connect = function() {
+                yourKey = document.getElementById('keyToConnect').value;
+                var webSocketUrl = 'ws://localhost:8080/websocket-example/example1/' + yourKey;
+                console.log(webSocketUrl);
+                ws = new WebSocket(webSocketUrl);
+                ws.onopen = function() {
+                    appendMessage('info', 'WebSocket connection opened!');
+                };
+                ws.onmessage = function(event) {
+                    appendMessage('message', event.data);
+                };
+                ws.onclose = function() {
+                    appendMessage('warn', 'WebSocket closed');
+                };
+                ws.onerror = function(err) {
+                    appendMessage(err);
+                };
+            };
+            
+            appendMessage = function(type, text) {
+                document.getElementById('messages').innerHTML += '<div class="' + type + '">' + text + '</div>';
+            };
+            sendMessageToKey = function() {
+                var messageToKey = document.getElementById('messageToKey').value;
+                ws.send(messageToKey);
+                appendMessage('message', 'you > ' + yourKey + ': "' + messageToKey + '"');
+            };
+            onFormSubmit = function() {
+                var messageToOther = document.getElementById('messageToOtherKey').value;
+                var otherKey = document.getElementById('otherKey').value;
+                appendMessage('message', 'you > ' + otherKey + ': "' + messageToOther + '"');
+            };
+        </script>
     </body>
 </html>
