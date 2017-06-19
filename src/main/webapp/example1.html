@@ -50,7 +50,6 @@
             connect = function() {
                 yourKey = document.getElementById('keyToConnect').value;
                 var webSocketUrl = 'ws://localhost:8080/websocket-example/example1/' + yourKey;
-                console.log(webSocketUrl);
                 ws = new WebSocket(webSocketUrl);
                 ws.onopen = function() {
                     appendMessage('info', 'WebSocket connection opened!');
