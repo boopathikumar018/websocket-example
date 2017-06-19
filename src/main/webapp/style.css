@@ -35,3 +35,7 @@ h1 {
 .table .button {
     font-weight: bold;
 }
+
+#usersList a {
+    display: block;
+}
