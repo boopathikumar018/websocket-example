@@ -39,3 +39,16 @@ h1 {
 #usersList a {
     display: block;
 }
+
+#tagList a.remove-tag {
+    color:#ff8866;
+    border: 1px solid #ff8866;
+    border-radius: 50px;
+    padding: 0.1em 0.4em;
+    text-decoration: none;
+}
+#tagList a.remove-tag:hover {
+    color: white;
+    background: red;
+    border: 1px solid #aa0000;
+}

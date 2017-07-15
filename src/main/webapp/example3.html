@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>WebSocket Example 3</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="style.css">
+    </head>
+    <body>
+        <h1>WebSocket Exaple 3</h1>
+        <p>In this example, the session can get many tags, and the username is
+            considered a tag too. This way, many clients can have the same or
+            different tags to receive the messages, according to the client
+            configuration.</p>
+        <p>As in example 2, JSON is used to pack information in each text
+            message.</p>
+        <p>Choose a username and add some tags. Open more tabs, use different
+            usernames and choose some tags:
+            <a href="example3.html" target="_blank">example3.html</a></p>
+        <p><a href="index.html">&lt; Back</a></p>
+        <div class="table">
+            <div>
+                <span>Your Username:</span>
+                <input id="username" placeholder="John Doe"/>
+            <button onclick="setUsername();return false;" class="button">Set Username</button>
+            </div>
+        </div>
+        <div class="table">
+            <div>Your tags</div>
+            <div id="tagList" ></div>
+            <input id="newTag" placeholder="Tag Name"/>
+            <button onclick="addTag();return false;" class="button">Add Tag</button>
+        </div>
+        <div id="globalMessage"></div>
+        <div>Your username: <span id="yourUsername"></span></div>
+        <div id="messages"></div>
+        <div class="table">
+            To send a message to a user, use '@username'. To send a message to a tag, use '#tag'.
+            <div>
+                <span>To:</span>
+                <input type="text" id="toTag" />
+                <span>Message:</span>
+                <input type="text" name="message" id="message"/>
+            </div>
+            <button onclick="send();return false;" class="button">Send</button>
+        </div>
+        <script type="text/javascript">
+            window.onload = function() {
+                connect();
+            };
+            var tags = new Array();
+            var username;
+            var ws;
+            connect = function() {
+                var webSocketUrl = 'ws://localhost:8080/websocket-example/example3/';
+                ws = new WebSocket(webSocketUrl);
+                ws.onopen = function() {
+                    globalMessage('info', 'Connection opened!');
+                };
+                ws.onmessage = function(event) {
+                    var message = JSON.parse(event.data);
+                    appendMessage(message.content, message.fromUser, message.toTag);
+                };
+                ws.onclose = function() {
+                    globalMessage('warn', 'WebSocket closed');
+                };
+                ws.onerror = function(err) {
+                    globalMessage('warn', err);
+                };
+            };
+            globalMessage = function(type, text) {
+                document.getElementById('globalMessage').innerHTML = '<div class="' + type + '">' + text + '</div>';
+            };
+            appendMessage = function(content, fromUser, toTag) {
+                var text = fromUser + ' -> ' + toTag + ': ' + content;
+                document.getElementById('messages').innerHTML += messageDiv(text);
+            };
+            messageDiv = function(text) {
+                return '<div class="message">' + text + '</div>';
+            };
+            setUsername = function() {
+                ws.send(JSON.stringify({"removeTag":username}));
+                username = '@'+document.getElementById('username').value;
+                ws.send(JSON.stringify({"addTag":username}));
+                document.getElementById('yourUsername').innerHTML = username;
+            };
+            addTag = function() {
+                var newTag = '#' + document.getElementById('newTag').value;
+                ws.send(JSON.stringify({"addTag":newTag}));
+                tags.push(newTag);
+                updateTagList();
+            };
+            removeTag = function(tag) {
+                ws.send(JSON.stringify({"removeTag":tag}));
+                tags.splice(tags.indexOf(tag), 1);
+                updateTagList();
+            };
+            updateTagList = function() {
+                document.getElementById('tagList').innerHTML = "";
+                tags.forEach(newTag);
+            };
+            newTag = function(tag) {
+                document.getElementById('tagList').innerHTML += '<div id="tag-'+tag+'">'+tag+' <a href="#" class="remove-tag" onclick="removeTag(\''+tag+'\');return false;">x</a></div>';
+            };
+            send = function() {
+                var message = document.getElementById('message').value;
+                var toTag = document.getElementById('toTag').value;
+                ws.send(JSON.stringify({'content':message,'fromUser':username,'toTag':toTag}));
+                appendMessage(message, username, toTag);
+            };
+        </script>
+    </body>
+</html>
